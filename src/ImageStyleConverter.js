@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import './index.css';
+import logo from './assets/logo.jpg';
 
 const ImageStyleConverter = () => {
   const [image, setImage] = useState(null);
@@ -62,7 +63,10 @@ const ImageStyleConverter = () => {
 
   return (
     <div className="container">
-      <h1>Image Style Converter</h1>
+      <h1>
+        <img src={logo} alt="Logo" />
+        Image Style Converter
+      </h1>
       <div className="input-group">
         <label htmlFor="image-upload">Upload Image</label>
         <div className="flex items-center">
