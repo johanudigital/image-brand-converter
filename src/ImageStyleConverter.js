@@ -113,7 +113,7 @@ const ImageStyleConverter = () => {
         <span className="text-sm">{color}</span>
       </div>
 
-      <div className="input-group flex items-center">
+      <div className="input-group flex-align-left">
         <input
           id="gradient"
           type="checkbox"
@@ -123,25 +123,27 @@ const ImageStyleConverter = () => {
         />
         <label htmlFor="gradient" className="mr-2">Add Gradient</label>
         {addGradient && (
-          <input
-            id="gradient-percentage"
-            type="range"
-            min={0}
-            max={100}
-            value={gradientPercentage}
-            onChange={(e) => setGradientPercentage(e.target.value)}
-            className="w-full"
-          />
+          <>
+            <input
+              id="gradient-percentage"
+              type="range"
+              min={0}
+              max={100}
+              value={gradientPercentage}
+              onChange={(e) => setGradientPercentage(e.target.value)}
+              className="w-full"
+            />
+            <span className="text-sm ml-2">{gradientPercentage}%</span>
+          </>
         )}
-        <span className="text-sm ml-2">{gradientPercentage}%</span>
       </div>
 
-      <button onClick={convertImage} disabled={!image} className="w-full mb-4 bg-orange-500 text-white px-4 py-2 rounded">
+      <button onClick={convertImage} disabled={!image} className="w-full mb-4 bg-orange-500 text-white px-4 py-2 rounded convert-image">
         Convert Image
       </button>
 
       {convertedImage && (
-        <button onClick={downloadImage} className="w-full bg-black text-white px-4 py-2 rounded">
+        <button onClick={downloadImage} className="w-full mb-4 bg-black text-white px-4 py-2 rounded">
           Download Image
         </button>
       )}
