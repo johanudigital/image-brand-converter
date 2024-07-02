@@ -1,10 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Slider from './components/ui/slider';
-import Button from './components/ui/button';
-import Input from './components/ui/input';
-import Label from './components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
-import { Upload, Paintbrush, Download } from 'lucide-react';
+import React, { useState, useRef } from 'react';
 
 const ImageStyleConverter = () => {
   const [image, setImage] = useState(null);
@@ -67,107 +61,95 @@ const ImageStyleConverter = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Image Style Converter</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div className="mb-6">
-                <Label htmlFor="image-upload" className="block mb-2">Upload Image</Label>
-                <div className="flex items-center">
-                  <Button 
-                    onClick={() => fileInputRef.current.click()}
-                    className="mr-2"
-                  >
-                    <Upload className="mr-2 h-4 w-4" /> Choose File
-                  </Button>
-                  <span className="text-sm text-gray-500">
-                    {image ? 'Image selected' : 'No file chosen'}
-                  </span>
-                </div>
-                <Input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  ref={fileInputRef}
-                />
-              </div>
-              
-              <div className="mb-6">
-                <Label htmlFor="transparency" className="block mb-2">Transparency: {transparency}%</Label>
-                <Slider
-                  id="transparency"
-                  min={0}
-                  max={100}
-                  value={[transparency]}
-                  onValueChange={(value) => setTransparency(value[0])}
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="mb-6">
-                <Label htmlFor="color" className="block mb-2">Brand Color</Label>
-                <div className="flex items-center">
-                  <Input
-                    id="color"
-                    type="color"
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    className="w-12 h-12 p-1 mr-2"
-                  />
-                  <span className="text-sm">{color}</span>
-                </div>
-              </div>
-              
-              <div className="mb-6">
-                <Label htmlFor="gradient" className="block mb-2">Add Gradient</Label>
-                <div className="flex items-center">
-                  <Input
-                    id="gradient"
-                    type="checkbox"
-                    checked={addGradient}
-                    onChange={(e) => setAddGradient(e.target.checked)}
-                    className="mr-2"
-                  />
-                  <span className="text-sm">Apply gradient overlay</span>
-                </div>
-              </div>
-              
-              <Button onClick={convertImage} disabled={!image} className="w-full mb-4">
-                <Paintbrush className="mr-2 h-4 w-4" /> Convert Image
-              </Button>
-              
-              {convertedImage && (
-                <Button onClick={downloadImage} className="w-full">
-                  <Download className="mr-2 h-4 w-4" /> Download Image
-                </Button>
-              )}
-            </div>
-            
-            <div>
-              {image && (
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold mb-2">Original Image</h2>
-                  <img src={image} alt="Original" className="max-w-full h-auto rounded-lg shadow-md" />
-                </div>
-              )}
-              
-              {convertedImage && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">Converted Image</h2>
-                  <img src={convertedImage} alt="Converted" className="max-w-full h-auto rounded-lg shadow-md" />
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <canvas ref={canvasRef} style={{ display: 'none' }} />
-        </CardContent>
-      </Card>
+      <div className="mb-6">
+        <label htmlFor="image-upload" className="block mb-2">Upload Image</label>
+        <div className="flex items-center">
+          <button 
+            onClick={() => fileInputRef.current.click()}
+            className="mr-2 bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Choose File
+          </button>
+          <span className="text-sm text-gray-500">
+            {image ? 'Image selected' : 'No file chosen'}
+          </span>
+        </div>
+        <input
+          id="image-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+          ref={fileInputRef}
+        />
+      </div>
+      
+      <div className="mb-6">
+        <label htmlFor="transparency" className="block mb-2">Transparency: {transparency}%</label>
+        <input
+          id="transparency"
+          type="range"
+          min={0}
+          max={100}
+          value={transparency}
+          onChange={(e) => setTransparency(e.target.value)}
+          className="w-full"
+        />
+      </div>
+      
+      <div className="mb-6">
+        <label htmlFor="color" className="block mb-2">Brand Color</label>
+        <div className="flex items-center">
+          <input
+            id="color"
+            type="color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            className="w-12 h-12 p-1 mr-2"
+          />
+          <span className="text-sm">{color}</span>
+        </div>
+      </div>
+      
+      <div className="mb-6">
+        <label htmlFor="gradient" className="block mb-2">Add Gradient</label>
+        <div className="flex items-center">
+          <input
+            id="gradient"
+            type="checkbox"
+            checked={addGradient}
+            onChange={(e) => setAddGradient(e.target.checked)}
+            className="mr-2"
+          />
+          <span className="text-sm">Apply gradient overlay</span>
+        </div>
+      </div>
+      
+      <button onClick={convertImage} disabled={!image} className="w-full mb-4 bg-green-500 text-white px-4 py-2 rounded">
+        Convert Image
+      </button>
+      
+      {convertedImage && (
+        <button onClick={downloadImage} className="w-full bg-blue-500 text-white px-4 py-2 rounded">
+          Download Image
+        </button>
+      )}
+      
+      {image && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Original Image</h2>
+          <img src={image} alt="Original" className="max-w-full h-auto rounded-lg shadow-md" />
+        </div>
+      )}
+      
+      {convertedImage && (
+        <div>
+          <h2 className="text-xl font-semibold mb-2">Converted Image</h2>
+          <img src={convertedImage} alt="Converted" className="max-w-full h-auto rounded-lg shadow-md" />
+        </div>
+      )}
+      
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
     </div>
   );
 };
