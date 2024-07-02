@@ -29,7 +29,7 @@
     "postcss": "^8.4.16",
     "tailwindcss": "^3.1.8",
     "classnames": "^2.3.1",
-    "lucide-react": "^0.12.109"
+    "lucide-react": "^0.245.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.18.6"
