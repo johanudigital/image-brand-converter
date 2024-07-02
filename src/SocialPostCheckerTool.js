@@ -1,228 +1,175 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { debounce } from 'lodash';
-import logo from './assets/logo.jpeg';
-import { franc } from 'franc-min';
-import langs from 'langs';
-import nlp from 'compromise';
+import React, { useState, useRef, useEffect } from 'react';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Upload, Paintbrush, Download } from 'lucide-react';
 
-const SocialPostCheckerTool = () => {
-  const [postContent, setPostContent] = useState('');
-  const [platform, setPlatform] = useState('twitter');
-  const [language, setLanguage] = useState('en');
-  const [aidaScore, setAidaScore] = useState({ attention: 0, interest: 0, desire: 0, action: 0 });
-  const [engagementScore, setEngagementScore] = useState(0);
-  const [feedback, setFeedback] = useState([]);
+const ImageStyleConverter = () => {
+  const [image, setImage] = useState(null);
+  const [transparency, setTransparency] = useState(50);
+  const [color, setColor] = useState('#000000');
+  const [convertedImage, setConvertedImage] = useState(null);
+  const [addGradient, setAddGradient] = useState(false);
+  const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  const platformMaxLengths = useMemo(() => ({
-    twitter: 280,
-    facebook: 63206,
-    instagram: 2200,
-    linkedin: 3000,
-  }), []);
-
-  const languageKeywords = useMemo(() => ({
-    en: {
-      attention: ['wow', 'amazing', 'exclusive', 'breaking', 'urgent'],
-      interest: ['why', 'how', 'what if', 'imagine', 'discover', 'curious'],
-      desire: ['limited', 'special', 'unique', 'new', 'improved', 'best'],
-      action: ['click', 'buy', 'subscribe', 'sign up', 'learn more', 'visit', 'try'],
-    },
-    nl: {
-      attention: ['wow', 'verbazingwekkend', 'exclusief', 'breaking', 'dringend'],
-      interest: ['waarom', 'hoe', 'wat als', 'stel je voor', 'ontdek', 'nieuwsgierig'],
-      desire: ['beperkt', 'speciaal', 'uniek', 'nieuw', 'verbeterd', 'beste'],
-      action: ['klik', 'koop', 'abonneer', 'meld je aan', 'leer meer', 'bezoek', 'probeer'],
-    },
-  }), []);
-
-  const detectLanguage = (text) => {
-    const detectedLangCode = franc(text);
-    const lang = langs.where("3", detectedLangCode);
-    return lang ? (lang.name === 'Dutch' ? 'nl' : 'en') : 'en';
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImage(event.target.result);
+    };
+    reader.readAsDataURL(file);
   };
 
-  const analyzePost = useCallback(debounce(() => {
-    let feedbackItems = [];
-    let attention = 0, interest = 0, desire = 0, action = 0;
-    let engagement = 0;
+  const convertImage = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      
+      // Apply color overlay
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = color;
+      ctx.globalAlpha = transparency / 100;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Apply gradient if selected
+      if (addGradient) {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        gradient.addColorStop(1, color);
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      // Reset composite operation and alpha
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      
+      setConvertedImage(canvas.toDataURL());
+    };
+    img.src = image;
+  };
 
-    const detectedLanguage = detectLanguage(postContent);
-    setLanguage(detectedLanguage);
-
-    const wordCount = postContent.split(/\s+/).filter(Boolean).length;
-    const charCount = postContent.length;
-    const maxLength = platformMaxLengths[platform];
-    const paragraphs = postContent.split('\n\n').filter(Boolean);
-
-    // Check post length
-    if (charCount > maxLength) {
-      feedbackItems.push({ type: 'error', message: `Post is too long for ${platform}. Maximum length is ${maxLength} characters.` });
-    } else if (charCount > maxLength * 0.9) {
-      feedbackItems.push({ type: 'warning', message: `Post is close to ${platform}'s character limit.` });
-    } else {
-      feedbackItems.push({ type: 'success', message: `Post length is good for ${platform}.` });
-      engagement += 10;
-    }
-
-    // Check paragraph structure
-    if (paragraphs.length === 1 && wordCount > 30) {
-      feedbackItems.push({ type: 'warning', message: "Consider breaking your content into paragraphs for better readability." });
-    } else if (paragraphs.length > 1) {
-      feedbackItems.push({ type: 'success', message: "Good use of paragraphs to structure your content." });
-      engagement += 5;
-    }
-
-    // Check for condensed content
-    if (wordCount / paragraphs.length > 50) {
-      feedbackItems.push({ type: 'warning', message: "Your paragraphs seem long. Consider breaking them up for easier reading." });
-    }
-
-    // Attention
-    if (postContent.match(/^(🚨|💥|🎉|📢|❗️)/)) {
-      attention += 25;
-      feedbackItems.push({ type: 'success', message: "Great use of attention-grabbing emoji at the start!" });
-    }
-    if (postContent.match(/^[A-Z\s!?]+/)) {
-      attention += 20;
-      feedbackItems.push({ type: 'success', message: "Strong opening with capital letters or punctuation." });
-    }
-    if (postContent.match(/\?|!/) && attention < 45) {
-      attention += 15;
-      feedbackItems.push({ type: 'success', message: "Good use of question or exclamation marks to grab attention." });
-    }
-
-    // AIDA model check using language-specific keywords
-    const keywords = languageKeywords[detectedLanguage];
-    Object.entries(keywords).forEach(([category, words]) => {
-      words.forEach(word => {
-        if (postContent.toLowerCase().includes(word.toLowerCase())) {
-          switch (category) {
-            case 'attention':
-              attention += 10;
-              break;
-            case 'interest':
-              interest += 10;
-              break;
-            case 'desire':
-              desire += 10;
-              break;
-            case 'action':
-              action += 15;
-              break;
-          }
-          feedbackItems.push({ type: 'success', message: `Good use of the ${category}-building word "${word}".` });
-        }
-      });
-    });
-
-    // Engagement factors
-    if (postContent.match(/\[.*?\]/)) {
-      engagement += 15;
-      feedbackItems.push({ type: 'success', message: "Good use of brackets to highlight important information." });
-    }
-    if (postContent.includes('#')) {
-      engagement += 10;
-      feedbackItems.push({ type: 'success', message: "Hashtags can increase engagement and discoverability." });
-    }
-    if (postContent.includes('@')) {
-      engagement += 10;
-      feedbackItems.push({ type: 'success', message: "Mentioning others can boost engagement and reach." });
-    }
-    if (postContent.match(/https?:\/\/\S+/)) {
-      engagement += 5;
-      feedbackItems.push({ type: 'success', message: "Including a link can drive traffic and engagement." });
-    }
-
-    // Cap scores at 100
-    attention = Math.min(attention, 100);
-    interest = Math.min(interest, 100);
-    desire = Math.min(desire, 100);
-    action = Math.min(action, 100);
-    engagement = Math.min(engagement, 100);
-
-    // Overall AIDA feedback
-    if (attention < 30) feedbackItems.push({ type: 'error', message: "Your post needs a stronger attention-grabbing element." });
-    if (interest < 30) feedbackItems.push({ type: 'error', message: "Try to make your post more interesting or intriguing." });
-    if (desire < 30) feedbackItems.push({ type: 'error', message: "Increase the desirability of your offer or content." });
-    if (action < 30) feedbackItems.push({ type: 'error', message: "Include a clearer call-to-action in your post." });
-
-    // Update state
-    setAidaScore({ attention, interest, desire, action });
-    setEngagementScore(engagement);
-    setFeedback(feedbackItems);
-  }, 500), [postContent, platform, language, platformMaxLengths, languageKeywords]);
-
-  const getProgressBarColor = useCallback((score) => {
-    if (score < 30) return 'red';
-    if (score < 70) return 'orange';
-    return 'green';
-  }, []);
-
-  const FeedbackItem = useMemo(() => ({ item }) => (
-    <li className={`feedback-item ${item.type}`}>
-      {item.type === 'success' && '✅ '}
-      {item.type === 'error' && '❌ '}
-      {item.type === 'warning' && '⚠️ '}
-      {item.type === 'info' && 'ℹ️ '}
-      {item.message}
-    </li>
-  ), []);
+  const downloadImage = () => {
+    const link = document.createElement('a');
+    link.href = convertedImage;
+    link.download = 'converted-image.png';
+    link.click();
+  };
 
   return (
-    <div className="container">
-      <header style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        <img src={logo} alt="Logo" style={{ height: '50px', marginRight: '20px' }} />
-        <h1>UDigital Social Post Checker</h1>
-      </header>
-      <div className="input-group">
-        <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
-          <option value="twitter">Twitter</option>
-          <option value="facebook">Facebook</option>
-          <option value="instagram">Instagram</option>
-          <option value="linkedin">LinkedIn</option>
-        </select>
-      </div>
-      <div className="input-group">
-        <textarea
-          value={postContent}
-          onChange={(e) => {
-            setPostContent(e.target.value);
-            analyzePost();
-          }}
-          placeholder={`Enter your ${platform} post here...`}
-        />
-      </div>
-      <div className="scores">
-        <h2>AIDA Scores:</h2>
-        {Object.entries(aidaScore).map(([key, value]) => (
-          <div key={key} className="score-item">
-            <h3>{key.charAt(0).toUpperCase() + key.slice(1)}: {value}/100</h3>
-            <div className="progress-bar">
-              <div
-                className="progress-bar-inner"
-                style={{ width: `${value}%`, backgroundColor: getProgressBarColor(value) }}
-              ></div>
+    <div className="max-w-2xl mx-auto p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Image Style Converter</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div className="mb-6">
+                <Label htmlFor="image-upload" className="block mb-2">Upload Image</Label>
+                <div className="flex items-center">
+                  <Button 
+                    onClick={() => fileInputRef.current.click()}
+                    className="mr-2"
+                  >
+                    <Upload className="mr-2 h-4 w-4" /> Choose File
+                  </Button>
+                  <span className="text-sm text-gray-500">
+                    {image ? 'Image selected' : 'No file chosen'}
+                  </span>
+                </div>
+                <Input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  ref={fileInputRef}
+                />
+              </div>
+              
+              <div className="mb-6">
+                <Label htmlFor="transparency" className="block mb-2">Transparency: {transparency}%</Label>
+                <Slider
+                  id="transparency"
+                  min={0}
+                  max={100}
+                  value={[transparency]}
+                  onValueChange={(value) => setTransparency(value[0])}
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="mb-6">
+                <Label htmlFor="color" className="block mb-2">Brand Color</Label>
+                <div className="flex items-center">
+                  <Input
+                    id="color"
+                    type="color"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="w-12 h-12 p-1 mr-2"
+                  />
+                  <span className="text-sm">{color}</span>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <Label htmlFor="gradient" className="block mb-2">Add Gradient</Label>
+                <div className="flex items-center">
+                  <Input
+                    id="gradient"
+                    type="checkbox"
+                    checked={addGradient}
+                    onChange={(e) => setAddGradient(e.target.checked)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Apply gradient overlay</span>
+                </div>
+              </div>
+              
+              <Button onClick={convertImage} disabled={!image} className="w-full mb-4">
+                <Paintbrush className="mr-2 h-4 w-4" /> Convert Image
+              </Button>
+              
+              {convertedImage && (
+                <Button onClick={downloadImage} className="w-full">
+                  <Download className="mr-2 h-4 w-4" /> Download Image
+                </Button>
+              )}
+            </div>
+            
+            <div>
+              {image && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold mb-2">Original Image</h2>
+                  <img src={image} alt="Original" className="max-w-full h-auto rounded-lg shadow-md" />
+                </div>
+              )}
+              
+              {convertedImage && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">Converted Image</h2>
+                  <img src={convertedImage} alt="Converted" className="max-w-full h-auto rounded-lg shadow-md" />
+                </div>
+              )}
             </div>
           </div>
-        ))}
-        <h2>Engagement Score: {engagementScore}/100</h2>
-        <div className="progress-bar">
-          <div
-            className="progress-bar-inner"
-            style={{ width: `${engagementScore}%`, backgroundColor: getProgressBarColor(engagementScore) }}
-          ></div>
-        </div>
-      </div>
-      <div>
-        <h3>Feedback:</h3>
-        <ul className="feedback">
-          {feedback.map((item, index) => (
-            <FeedbackItem key={index} item={item} />
-          ))}
-        </ul>
-      </div>
+          
+          <canvas ref={canvasRef} style={{ display: 'none' }} />
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default SocialPostCheckerTool;
+export default ImageStyleConverter;
