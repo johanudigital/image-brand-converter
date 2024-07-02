@@ -1,0 +1,2 @@
+(this["webpackJsonpimage-brand-converter"]=this["webpackJsonpimage-brand-converter"]||[]).push([[0],{21:function(e,n,r){},27:function(e,n,r){"use strict";r.r(n);r(0);var t=r(13),a=r.n(t),c=r(14),o=r(1);r(21);a.a.render(Object(o.jsx)(c.a,{basename:"/image-brand-converter",children:Object(o.jsx)(ImageStyleConverter,{})}),document.getElementById("root"))}},[[27,1,2]]]);
+//# sourceMappingURL=main.ff419f08.chunk.js.map
