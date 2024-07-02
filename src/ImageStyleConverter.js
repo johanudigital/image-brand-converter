@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import './index.css';
 
 const ImageStyleConverter = () => {
   const [image, setImage] = useState(null);
@@ -60,13 +61,14 @@ const ImageStyleConverter = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="mb-6">
-        <label htmlFor="image-upload" className="block mb-2">Upload Image</label>
+    <div className="container">
+      <h1>Image Style Converter</h1>
+      <div className="input-group">
+        <label htmlFor="image-upload">Upload Image</label>
         <div className="flex items-center">
           <button 
             onClick={() => fileInputRef.current.click()}
-            className="mr-2 bg-blue-500 text-white px-4 py-2 rounded"
+            className="mr-2"
           >
             Choose File
           </button>
@@ -84,8 +86,8 @@ const ImageStyleConverter = () => {
         />
       </div>
       
-      <div className="mb-6">
-        <label htmlFor="transparency" className="block mb-2">Transparency: {transparency}%</label>
+      <div className="input-group">
+        <label htmlFor="transparency">Transparency: {transparency}%</label>
         <input
           id="transparency"
           type="range"
@@ -97,32 +99,26 @@ const ImageStyleConverter = () => {
         />
       </div>
       
-      <div className="mb-6">
-        <label htmlFor="color" className="block mb-2">Brand Color</label>
-        <div className="flex items-center">
-          <input
-            id="color"
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="w-12 h-12 p-1 mr-2"
-          />
-          <span className="text-sm">{color}</span>
-        </div>
+      <div className="input-group">
+        <label htmlFor="color">Brand Color</label>
+        <input
+          id="color"
+          type="color"
+          value={color}
+          onChange={(e) => setColor(e.target.value)}
+        />
+        <span className="text-sm">{color}</span>
       </div>
       
-      <div className="mb-6">
-        <label htmlFor="gradient" className="block mb-2">Add Gradient</label>
-        <div className="flex items-center">
-          <input
-            id="gradient"
-            type="checkbox"
-            checked={addGradient}
-            onChange={(e) => setAddGradient(e.target.checked)}
-            className="mr-2"
-          />
-          <span className="text-sm">Apply gradient overlay</span>
-        </div>
+      <div className="input-group">
+        <label htmlFor="gradient">Add Gradient</label>
+        <input
+          id="gradient"
+          type="checkbox"
+          checked={addGradient}
+          onChange={(e) => setAddGradient(e.target.checked)}
+        />
+        <span className="text-sm">Apply gradient overlay</span>
       </div>
       
       <button onClick={convertImage} disabled={!image} className="w-full mb-4 bg-green-500 text-white px-4 py-2 rounded">
@@ -136,20 +132,22 @@ const ImageStyleConverter = () => {
       )}
       
       {image && (
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Original Image</h2>
-          <img src={image} alt="Original" className="max-w-full h-auto rounded-lg shadow-md" />
+        <div className="input-group">
+          <h2>Original Image</h2>
+          <img src={image} alt="Original" />
         </div>
       )}
       
       {convertedImage && (
-        <div>
-          <h2 className="text-xl font-semibold mb-2">Converted Image</h2>
-          <img src={convertedImage} alt="Converted" className="max-w-full h-auto rounded-lg shadow-md" />
+        <div className="input-group">
+          <h2>Converted Image</h2>
+          <img src={convertedImage} alt="Converted" />
         </div>
       )}
       
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      <div className="canvas-container">
+        <canvas ref={canvasRef} />
+      </div>
     </div>
   );
 };
