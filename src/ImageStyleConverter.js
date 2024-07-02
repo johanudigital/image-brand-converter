@@ -30,23 +30,20 @@ const ImageStyleConverter = () => {
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
 
-      // Apply color overlay
       ctx.globalCompositeOperation = 'multiply';
       ctx.fillStyle = color;
       ctx.globalAlpha = transparency / 100;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Apply gradient if selected
       if (addGradient) {
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
         gradient.addColorStop(1, color);
         ctx.globalAlpha = gradientPercentage / 100;
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      // Reset composite operation and alpha
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
 
@@ -62,22 +59,12 @@ const ImageStyleConverter = () => {
     link.click();
   };
 
-  return (
+return (
     <div className="container">
       <h1>
-        <img src={logo} alt="Logo" />
         Image Style Converter
       </h1>
-      <div className="input-group">
-        <label htmlFor="image-upload">Upload Image</label>
-        <div className="flex items-center">
-          <button onClick={() => fileInputRef.current.click()} className="mr-2">
-            Choose File
-          </button>
-          <span className="text-sm text-gray-500">
-            {image ? 'Image selected' : 'No file chosen'}
-          </span>
-        </div>
+      <div>
         <input
           id="image-upload"
           type="file"
@@ -113,7 +100,7 @@ const ImageStyleConverter = () => {
         <span className="text-sm">{color}</span>
       </div>
 
-      <div className="input-group flex-align-left">
+      <div className="input-group align-left">
         <input
           id="gradient"
           type="checkbox"
@@ -138,19 +125,19 @@ const ImageStyleConverter = () => {
         )}
       </div>
 
-      <button onClick={convertImage} disabled={!image} className="w-full mb-4 bg-orange-500 text-white px-4 py-2 rounded convert-image">
+      <button onClick={convertImage} disabled={!image} className="w-full mb-4 orange">
         Convert Image
       </button>
 
       {convertedImage && (
-        <button onClick={downloadImage} className="w-full mb-4 bg-black text-white px-4 py-2 rounded">
+        <button onClick={downloadImage} className="w-full mb-4 black">
           Download Image
         </button>
       )}
 
       {image && (
         <div className="input-group">
-          <h2>Original Image</h2>
+          <h2>Original Image</2>
           <img src={image} alt="Original" />
         </div>
       )}
