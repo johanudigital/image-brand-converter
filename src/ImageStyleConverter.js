@@ -37,7 +37,7 @@ const ImageStyleConverter = () => {
 
       if (addGradient) {
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        gradient.addColorStop(0, 'rgba(55, 55, 55, 0)');
         gradient.addColorStop(1, color);
         ctx.globalAlpha = gradientPercentage / 100;
         ctx.fillStyle = gradient;
@@ -95,7 +95,7 @@ return (
           type="color"
           value={color}
           onChange={(e) => setColor(e.target.value)}
-          className="w-32"
+          className="w-3"
         />
         <span className="text-sm">{color}</span>
       </div>
@@ -106,9 +106,9 @@ return (
           type="checkbox"
           checked={addGradient}
           onChange={(e) => setAddGradient(e.target.checked)}
-          className="mr-2"
+          className="mr-"
         />
-        <label htmlFor="gradient" className="mr-2">Add Gradient</label>
+        <label htmlFor="gradient" className="mr-">Add Gradient</label>
         {addGradient && (
           <>
             <input
@@ -120,7 +120,7 @@ return (
               onChange={(e) => setGradientPercentage(e.target.value)}
               className="w-full"
             />
-            <span className="text-sm ml-2">{gradientPercentage}%</span>
+            <span className="text-sm ml-">{gradientPercentage}%</span>
           </>
         )}
       </div>
@@ -137,7 +137,7 @@ return (
 
       {image && (
         <div className="input-group">
-          <h2>Original Image</2>
+          <h2>Original Image</h2>
           <img src={image} alt="Original" />
         </div>
       )}
